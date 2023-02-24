@@ -4,19 +4,25 @@
 * Author: Yves
 * Tags: 
 */
+experiment MPAV2 model: '../core/Global.gaml' type: gui {
+/** Insert here the definition of the inputs and outputs of the model */
 
-experiment MPAV2 model:'../core/Global.gaml' type:gui {
-	/** Insert here the definition of the inputs and outputs of the model */
-	
-	/** Parameters can be used to input values to the model **/
-	// parameter "First parameter" var: an_attribute_of_the_model <- an_expression;
-	
+/** Parameters can be used to input values to the model **/
+// parameter "First parameter" var: an_attribute_of_the_model <- an_expression;
 	output {
-		/** monitors can be used to output values, either in the UI or in a file **/
-		// monitor "m1" value: an_expression;
-		display map type: opengl draw_env: false background: #white refresh: every(1#cycle){
-			species Road  aspect: default;
+	/** monitors can be used to output values, either in the UI or in a file **/
+	// monitor "m1" value: an_expression;
+		display map type: opengl draw_env: false background: #black refresh: every(1 #cycle) {
+			species Road aspect: default;
+			species Building aspect: depth refresh: true;
+			species Human aspect: default;
+			species BusStop aspect: default;
+			species Mpav aspect: default;
+			species Bus aspect: default;
 		}
 
+		monitor "Time" value: string(current_date.hour) + "h" + string(current_date.minute) + "m";
+		monitor "transportTypeCumulativeUsage" value: transportTypeCumulativeUsage;
 	}
+
 }

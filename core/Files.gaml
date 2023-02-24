@@ -14,7 +14,7 @@ global {
 	
 	file activityPerProfileFile <- file(includesPath + "ActivityPerProfile.csv");
 	file criteriaFile <- file(includesPath + "CriteriaFile.csv");
-	file activtyPerProfileFile <- file(includesPath + "g_ActivityPerProfile.csv");
+	file activtyPerGoodsFile <- file(includesPath + "g_ActivityPerProfile.csv");
 	file goodsTimeDistributionFile <- file(includesPath + "GoodsTimeDistribution.csv");
 	file goodsTimeDistribution2File <- file(includesPath + "GoodsTimeDistribution2.csv");
 	file goodsTimeDistribution3File <- file(includesPath + "GoodsTimeDistribution3.csv");

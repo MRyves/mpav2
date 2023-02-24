@@ -5,7 +5,7 @@
 * Tags: 
 */
 
-model MPAV2
+model Road
 
 import "../Shared.gaml"
 

@@ -60,17 +60,17 @@ species Human skills: [moving] {
 	}
 
 	list<string> evalPossibleMobilityModes {
-		list<string> modes <- [WALKING, "bus"];
+		list<string> modes <- [WALKING, BUS];
 		if (hasCar) {
-			modes << "car";
+			modes << CAR;
 		}
 
 		if (hasBike) {
-			modes << "bike";
+			modes << BIKE;
 		}
 
 		if mpavType != "Truck" {
-			modes << "mpav";
+			modes << MPAV;
 		}
 
 		return modes;
@@ -117,7 +117,7 @@ species Human skills: [moving] {
 
 		Building activityBuilding <- one_of(possibleBuildings);
 		if (activityBuilding = nil) {
-			error "problem with act_real: " + activity;
+			error "problem with activity: " + activity;
 		}
 
 		return activityBuilding;
@@ -240,22 +240,21 @@ species Human skills: [moving] {
 		return candidates;
 	}
 
-	// TODO: refactor this method
-	reflex move when: (currentObjective != nil) and (mobilityMode != "bus") and (mobilityMode != "mpav") {
+	reflex move when: (currentObjective != nil) and (mobilityMode != BUS) and (mobilityMode != MPAV) {
 		transportTypeDistance[mobilityMode] <- transportTypeDistance[mobilityMode] + speed / step;
-		if ((current_edge != nil) and (mobilityMode = "car")) {
+		if ((current_edge != nil) and (mobilityMode = CAR)) {
 			Road(current_edge).currentConcentration <- max([0, Road(current_edge).currentConcentration - 1]);
 		}
 
-		if (mobilityMode = "car") {
-			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] move_weights: congestionMap speed: speedPerMobility["car"];
+		if (mobilityMode = CAR) {
+			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] move_weights: congestionMap speed: speedPerMobility[CAR];
 		} else {
 			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] speed: speedPerMobility[mobilityMode];
 		}
 
 		if (location = currentObjective.target.location) {
 			do stopTimer;
-			if (mobilityMode = "car" and updatePollution = true) {
+			if (mobilityMode = CAR and updatePollution = true) {
 				do updatePollutionMap;
 			}
 
@@ -264,7 +263,7 @@ species Human skills: [moving] {
 			currentObjective <- nil;
 			mobilityMode <- nil;
 		} else {
-			if ((current_edge != nil) and (mobilityMode = "car")) {
+			if ((current_edge != nil) and (mobilityMode = CAR)) {
 				Road(current_edge).currentConcentration <- Road(current_edge).currentConcentration + 1;
 			}
 
@@ -272,7 +271,7 @@ species Human skills: [moving] {
 
 	}
 
-	reflex move_bus when: (currentObjective != nil) and (mobilityMode = "bus") {
+	reflex move_bus when: (currentObjective != nil) and (mobilityMode = BUS) {
 		if (publicTransportStatus = nil or publicTransportStatus = WALKING_PICK_UP) {
 			publicTransportStatus <- WALKING_PICK_UP;
 			do goto target: closestBusStop.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
@@ -302,7 +301,7 @@ species Human skills: [moving] {
 
 	}
 
-	reflex move_mpav when: (currentObjective != nil) and (mobilityMode = "mpav") {
+	reflex move_mpav when: (currentObjective != nil) and (mobilityMode = MPAV) {
 		if (publicTransportStatus = nil or publicTransportStatus = WALKING_PICK_UP) {
 			publicTransportStatus <- WALKING_PICK_UP;
 			do goto target: closestBuilding.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
@@ -348,19 +347,19 @@ species Human skills: [moving] {
 					_color <- #lightyellow;
 				}
 
-				match "bike" {
+				match BIKE {
 					_color <- #white;
 				}
 
-				match "car" {
+				match CAR {
 					_color <- #red;
 				}
 
-				match "mpav" {
+				match MPAV {
 					_color <- #lime;
 				}
 
-				match "bus" {
+				match BUS {
 					_color <- #cyan;
 				}
 

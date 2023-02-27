@@ -4,63 +4,84 @@
 * Author: Yves
 * Tags: 
 */
-
-
 model Bus
 
 import "Human.gaml"
-
 species Bus skills: [moving] {
-	list<BusStop> stops; 
-	map<BusStop,list<Human>> peopleAtStops;
-	geometry shape;
-	
- 
+	geometry shape <- rectangle(40, 30);
+	// list of all the bus stops on the map
+	list<BusStop> stops;
+	// the next bus stop
 	BusStop target;
-	
-	reflex new_target when: target = nil{
+	// key: bus stop, value: humans which have to go to the bus stop (key)
+	// one can consider that the values are all the humans currently on the bus
+	map<BusStop, list<Human>> peopleToStops;
+
+	reflex newTarget when: target = nil {
 		BusStop firstStop <- first(stops);
+		// move next stop to the end of the stops list
 		remove firstStop from: stops;
-		add firstStop to: stops; 
+		add firstStop to: stops;
 		target <- firstStop;
 	}
-	
-	reflex move when: target != nil{
-		do goto target: target.location on: graphPerMobility["car"] speed:speedPerMobility["bus"];
-		int nb_passengers <- peopleAtStops.values sum_of (length(each));
+
+	reflex move when: target != nil {
+		do goto target: target.location on: graphPerMobility[CAR] speed: speedPerMobility[BUS];
+		int nb_passengers <- peopleToStops.values sum_of (length(each));
 		if (nb_passengers > 0) {
-				transportTypeDistance["bus"] <- transportTypeDistance["bus"] + speed/step;
-				transportTypeDistance["bus_people"] <- transportTypeDistance["bus_people"] + speed/step * nb_passengers;
-		} 
-			
-		if(location = target.location) {
-			// release some people
-			ask peopleAtStops[target] {
-				location <- myself.target.location;
-				publicTransportStatus <- WALKING_TARGET;
-			}
-			peopleAtStops[target] <- [];
-			
-			// get some people
-			loop p over: target.waitingPeople {
-				BusStop b <- BusStop with_min_of(each distance_to(p.currentObjective.target.location));
-				add p to: peopleAtStops[b] ;
-			}
-			target.waitingPeople <- [];						
-			target <- nil;			
+			transportTypeDistance[BUS] <- transportTypeDistance[BUS] + speed / step;
+			transportTypeDistance["bus_people"] <- transportTypeDistance["bus_people"] + speed / step * nb_passengers;
 		}
+
+		if (location = target.location) {
+		// the bus has reached the current target (bus station)
+			do releasePeople;
+			do pickupPeople;
+			target <- nil;
+		}
+
 	}
 
+	/**
+	 * Release the people at the bus stop which is closest to their objective location.
+	 * Only release peopel if the location of the bus is equal to the location of the bus stop
+	 */
+	action releasePeople {
+		ask peopleToStops[target] {
+			location <- myself.target.location;
+			publicTransportStatus <- WALKING_TARGET;
+		}
+
+		peopleToStops[target] <- [];
+	}
+
+	/**
+	 * Pick up the people which are waiting at the current bus stop.
+	 */
+	action pickupPeople {
+		loop p over: target.waitingPeople {
+			BusStop b <- BusStop with_min_of (each distance_to (p.currentObjective.target.location));
+			add p to: peopleToStops[b];
+		}
+
+		target.waitingPeople <- [];
+	}
+
+	/**
+	 * Update the location of the people inside the bus
+	 */
 	reflex carry {
-		shape <- rectangle(40,30);
 		loop stop over: stops {
-			ask peopleAtStops[stop] {
+			ask peopleToStops[stop] {
 				location <- any_location_in(myself.shape);
 			}
+
 		}
+
 	}
-	
+
 	aspect default {
 		draw shape color: #darkcyan;
 	}
+
 }

@@ -22,33 +22,36 @@ species Goods {
 	float time_stamp;
 
 	action initPosition {
-		if type = "foods" {
-			origin <- one_of(Building where (each.category = "Restaurant"));
-			location <- any_location_in(origin);
-		} else {
-			origin <- one_of(Building where (each.usage = "Hub"));
-			location <- any_location_in(origin);
+		switch type {
+			match "foods" {
+				origin <- one_of(Building where (each.category = "Restaurant"));
+				location <- any_location_in(origin);
+				color <- #yellow;
+			}
+
+			match "package" {
+				origin <- one_of(Building where (each.usage = "Hub"));
+				location <- any_location_in(origin);
+				color <- #aqua;
+			}
+
+			default {
+				error "Invalid goods type: " + type;
+			}
+
 		}
 
 		mpavWaitingGoods << self;
-		time_stamp <- time;
+		time_stamp <- time; // start timer
 	}
 
-	//	reflex disapear when: location = objective.location {
-	//		do die;
-	//	}
 	action timer_stop {
 		goodsTripTimeTotal << time - time_stamp;
 		time_stamp <- time;
 	}
 
 	aspect default {
-		if (type = "foods") {
-			draw triangle(size * 1.2) color: #yellow;
-		} else {
-			draw triangle(size * 1.2) color: #aqua;
-		}
-
+		draw triangle(size * 1.2) color: color;
 	}
 
 }

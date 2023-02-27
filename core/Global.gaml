@@ -45,7 +45,7 @@ global {
 		create Bus number: 1 {
 			stops <- list(BusStop);
 			location <- first(stops).location;
-			peopleAtStops <- map<BusStop, list<Human>>(stops collect(each::[]));
+			peopleToStops <- map<BusStop, list<Human>>(stops collect(each::[]));
 		}	
 		
 		create Human number: peopleCount {
@@ -74,21 +74,21 @@ global {
 			location <- one_of(Building where (each.usage = "Hub")).location;
 			switch type {
 				match "Truck" {
-					speed <- speedPerMobility["car"];
+					speed <- speedPerMobility[CAR];
 					maxPeopleCount <- 0;
 					maxGoodsCount <- 50;
 				}
 
 				match "MPAV" {
 				// big AV
-					speed <- speedPerMobility["bike"];
+					speed <- speedPerMobility[BIKE];
 					maxPeopleCount <- 4;
 					maxGoodsCount <- 10;
 				}
 
 				match "PEV" {
 				// small AV
-					speed <- speedPerMobility["bike"];
+					speed <- speedPerMobility[BIKE];
 					maxPeopleCount <- 1;
 					maxGoodsCount <- 3;
 				}

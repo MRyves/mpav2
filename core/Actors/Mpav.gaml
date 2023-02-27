@@ -94,7 +94,7 @@ species Mpav skills: [moving] {
 				remove p from: peopleInMpav;
 				ask p {
 					location <- myself.target.location;
-					mpavStatus <- 2;
+					publicTransportStatus <- WALKING_TARGET;
 				}
 
 			}

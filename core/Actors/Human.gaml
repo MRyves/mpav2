@@ -33,22 +33,26 @@ global {
 }
 
 species Human skills: [moving] {
+
+	// static human values
+	float size <- 5 #m;
 	string od;
 	string type;
 	rgb color;
-	float size <- 5 #m;
 	Building livingPlace;
 	list<TripObjective> objectives;
-	TripObjective currentObjective;
-	Building currentPlace;
-	string mobilityMode;
 	list<string> possibleMobilityModes;
 	bool hasCar;
 	bool hasBike;
+
+	// dynamic values:
+	TripObjective currentObjective;
+	Building currentPlace;
+	string mobilityMode;
 	BusStop closestBusStop;
 	Building closestBuilding;
-	int busStatus <- 0;
-	int mpavStatus <- 0;
+	
+	int publicTransportStatus;
 	float time_stamp;
 
 	init {
@@ -56,7 +60,7 @@ species Human skills: [moving] {
 	}
 
 	list<string> evalPossibleMobilityModes {
-		list<string> modes <- ["walking", "bus"];
+		list<string> modes <- [WALKING, "bus"];
 		if (hasCar) {
 			modes << "car";
 		}
@@ -81,8 +85,8 @@ species Human skills: [moving] {
 		loop key over: activities.keys {
 			string activitiesRawString <- activities[key];
 			if (activitiesRawString != "") {
-				list<string> activities <- activitiesRawString split_with "|";
-				string selectedActivity <- one_of(activities);
+				list<string> activitiesParsed <- activitiesRawString split_with "|";
+				string selectedActivity <- one_of(activitiesParsed);
 				Building activityBuilding <- selectRandomBuildingForActivty(od, selectedActivity);
 				do createActivity(selectedActivity, activityBuilding, key);
 			}
@@ -149,7 +153,7 @@ species Human skills: [moving] {
 		if (currentObjective != nil) {
 			currentPlace <- nil;
 			do chooseMobilityMode;
-			do timer_start;
+			do startTimer;
 		}
 
 	}
@@ -236,6 +240,7 @@ species Human skills: [moving] {
 		return candidates;
 	}
 
+	// TODO: refactor this method
 	reflex move when: (currentObjective != nil) and (mobilityMode != "bus") and (mobilityMode != "mpav") {
 		transportTypeDistance[mobilityMode] <- transportTypeDistance[mobilityMode] + speed / step;
 		if ((current_edge != nil) and (mobilityMode = "car")) {
@@ -249,7 +254,7 @@ species Human skills: [moving] {
 		}
 
 		if (location = currentObjective.target.location) {
-			do timer_stop;
+			do stopTimer;
 			if (mobilityMode = "car" and updatePollution = true) {
 				do updatePollutionMap;
 			}
@@ -268,31 +273,29 @@ species Human skills: [moving] {
 	}
 
 	reflex move_bus when: (currentObjective != nil) and (mobilityMode = "bus") {
-	// bus_status=0 walk to bus station
-		if (busStatus = 0) {
-			do goto target: closestBusStop.location on: graphPerMobility["walking"] speed: speedPerMobility["walking"];
-			transportTypeDistance["walking"] <- transportTypeDistance["walking"] + speed / step;
+		if (publicTransportStatus = nil or publicTransportStatus = WALKING_PICK_UP) {
+			publicTransportStatus <- WALKING_PICK_UP;
+			do goto target: closestBusStop.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
+			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
 
-			// bus_status=1 add human to waiting list
 			if (location = closestBusStop.location) {
 				add self to: closestBusStop.waitingPeople;
-				busStatus <- 1;
+				publicTransportStatus <- WAITING_PICK_UP;
 			}
 
-			//		bus_status=2 arrived at bus stop closest to the object target, walk from there to target.
-		} else if (busStatus = 2) {
-			do goto target: currentObjective.target.location on: graphPerMobility["walking"] speed: speedPerMobility["walking"];
-			transportTypeDistance["walking"] <- transportTypeDistance["walking"] + speed / step;
+		} else if (publicTransportStatus = WALKING_TARGET) {
+			do goto target: currentObjective.target.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
+			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
 
-			//			target location reached, resetting params
+			//	target location reached, resetting params
 			if (location = currentObjective.target.location) {
-				do timer_stop;
+				do stopTimer;
 				currentPlace <- currentObjective.target;
 				closestBusStop <- BusStop with_min_of (each distance_to (self));
 				location <- any_location_in(currentPlace);
 				currentObjective <- nil;
 				mobilityMode <- nil;
-				busStatus <- 0;
+				publicTransportStatus <- nil;
 			}
 
 		}
@@ -300,37 +303,37 @@ species Human skills: [moving] {
 	}
 
 	reflex move_mpav when: (currentObjective != nil) and (mobilityMode = "mpav") {
-		if (mpavStatus = 0) {
-			do goto target: closestBuilding.location on: graphPerMobility["walking"] speed: speedPerMobility["walking"];
-			transportTypeDistance["walking"] <- transportTypeDistance["walking"] + speed / step;
+		if (publicTransportStatus = nil or publicTransportStatus = WALKING_PICK_UP) {
+			publicTransportStatus <- WALKING_PICK_UP;
+			do goto target: closestBuilding.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
+			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
 			if (location = closestBuilding.location) {
 				add self to: mpavWaitingPeople;
-				mpavStatus <- 1;
+				publicTransportStatus <- WAITING_PICK_UP;
 			}
 
-		} else if (mpavStatus = 2) {
-			do goto target: currentObjective.target.location on: graphPerMobility["walking"] speed: speedPerMobility["walking"];
-			transportTypeDistance["walking"] <- transportTypeDistance["walking"] + speed / step;
+		} else if (publicTransportStatus = WALKING_TARGET) {
+			do goto target: currentObjective.target.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
+			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
 			if (location = currentObjective.target.location) {
-				do timer_stop;
+				do stopTimer;
 				currentPlace <- currentObjective.target;
 				closestBuilding <- Building with_min_of (each distance_to (self));
 				location <- any_location_in(currentPlace);
 				currentObjective <- nil;
 				mobilityMode <- nil;
-				busStatus <- 0;
-				mpavStatus <- 0;
+				publicTransportStatus <- nil;
 			}
 
 		}
 
 	}
 
-	action timer_start {
+	action startTimer {
 		time_stamp <- time;
 	}
 
-	action timer_stop {
+	action stopTimer {
 		peopleTripTimeTotal << time - time_stamp;
 		time_stamp <- time;
 	}
@@ -341,7 +344,7 @@ species Human skills: [moving] {
 		} else {
 			rgb _color <- #grey;
 			switch mobilityMode {
-				match "walking" {
+				match WALKING {
 					_color <- #lightyellow;
 				}
 

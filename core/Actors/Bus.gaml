@@ -37,7 +37,7 @@ species Bus skills: [moving] {
 			// release some people
 			ask peopleAtStops[target] {
 				location <- myself.target.location;
-				busStatus <- 2;
+				publicTransportStatus <- WALKING_TARGET;
 			}
 			peopleAtStops[target] <- [];
 			

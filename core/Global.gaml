@@ -99,17 +99,6 @@ global {
 
 	}
 
-	/**
-	 * Function has to be in global since it accesses Roads
-	 */
-	action computeMobilityGraph {
-		write "Calculating mobility graph";
-		loop mode over: colorPerMobility.keys {
-			graphPerMobility[mode] <- as_edge_graph(Road where (mode in each.mobilityAllowed)) use_cache false;
-		}
-
-	}
-	
 	action generateGoods {
 		create Goods number: goodsData["foods"][current_date.hour] {
 			type <- "foods";
@@ -127,11 +116,6 @@ global {
 		do generateGoods;
 	}
 	
-	reflex update_road_weights {
-		ask Road {
-			congestionMap[self] <- speedCoeff;
-		}
-	}
 
 }
 

@@ -27,10 +27,10 @@ species Bus skills: [moving] {
 
 	reflex move when: target != nil {
 		do goto target: target.location on: graphPerMobility[CAR] speed: speedPerMobility[BUS];
-		int nb_passengers <- peopleToStops.values sum_of (length(each));
-		if (nb_passengers > 0) {
+		int passengersCount <- peopleToStops.values sum_of (length(each));
+		if (passengersCount > 0) {
 			transportTypeDistance[BUS] <- transportTypeDistance[BUS] + speed / step;
-			transportTypeDistance["bus_people"] <- transportTypeDistance["bus_people"] + speed / step * nb_passengers;
+			transportTypeDistance["bus_people"] <- transportTypeDistance["bus_people"] + speed / step * passengersCount;
 		}
 
 		if (location = target.location) {

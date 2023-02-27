@@ -8,11 +8,6 @@ model Buildung
 
 import "../Constants.gaml"
 
-global {
-	
-
-}
-
 species Building {
 	string usage;
 	string scale;

@@ -96,7 +96,7 @@ species Mpav skills: [moving] {
 		loop g over: goodsInMpav where ((each.target = target)) {
 			remove g from: goodsInMpav;
 			ask g {
-				do timer_stop;
+				do stopTimer;
 				do die;
 			}
 

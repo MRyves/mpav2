@@ -19,7 +19,7 @@ species Goods {
 	float size <- 10 #m;
 	Building target;
 	Building origin;
-	float time_stamp;
+	float timeStamp;
 
 	action initPosition {
 		switch type {
@@ -29,7 +29,7 @@ species Goods {
 				color <- #yellow;
 			}
 
-			match "package" {
+			match "packages" {
 				origin <- one_of(Building where (each.usage = "Hub"));
 				location <- any_location_in(origin);
 				color <- #aqua;
@@ -42,12 +42,12 @@ species Goods {
 		}
 
 		mpavWaitingGoods << self;
-		time_stamp <- time; // start timer
+		timeStamp <- time; // start timer
 	}
 
-	action timer_stop {
-		goodsTripTimeTotal << time - time_stamp;
-		time_stamp <- time;
+	action stopTimer {
+		goodsTripTimeTotal << time - timeStamp;
+		timeStamp <- time;
 	}
 
 	aspect default {

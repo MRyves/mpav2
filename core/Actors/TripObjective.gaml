@@ -15,5 +15,4 @@ species TripObjective {
 	Building target;
 	int startHour;
 	int startMinute;
-	
 }

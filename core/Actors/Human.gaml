@@ -34,7 +34,7 @@ global {
 
 species Human skills: [moving] {
 
-	// static human values
+// static human values
 	float size <- 5 #m;
 	string od;
 	string type;
@@ -51,9 +51,8 @@ species Human skills: [moving] {
 	string mobilityMode;
 	BusStop closestBusStop;
 	Building closestBuilding;
-	
 	int publicTransportStatus;
-	float time_stamp;
+	float timeStamp;
 
 	init {
 		write "Calling Human#Init";
@@ -158,8 +157,12 @@ species Human skills: [moving] {
 
 	}
 
+	/**
+	 * Note: I did not change anything in this method. To be honest, I don't really get how it evaluates the mobility modes.
+	 * All I changed are the names of the variables, to be in line with other variable names.
+	 */
 	action chooseMobilityMode {
-		list<list> cands <- mobility_mode_eval();
+		list<list> candidates <- evalutateMobilityMode();
 		map<string, list<float>> crits <- humanActivityProb[type];
 		list<float> vals;
 		loop obj over: crits.keys {
@@ -170,12 +173,12 @@ species Human skills: [moving] {
 
 		}
 
-		list<map> criteria_WM;
+		list<map> criteriaWeightedMeans;
 		loop i from: 0 to: length(vals) - 1 {
-			criteria_WM << ["name"::"crit" + i, "weight"::vals[i]];
+			criteriaWeightedMeans << ["name"::"crit" + i, "weight"::vals[i]];
 		}
 
-		int choice <- weighted_means_DM(cands, criteria_WM);
+		int choice <- weighted_means_DM(candidates, criteriaWeightedMeans);
 		if (choice >= 0) {
 			mobilityMode <- possibleMobilityModes[choice];
 		} else {
@@ -198,7 +201,11 @@ species Human skills: [moving] {
 		transportTypeTotalDistance_goods[mobilityMode] <- transportTypeTotalDistance['MPAV'] + speedPerMobility['MPAV'];
 	}
 
-	list<list> mobility_mode_eval {
+	/**
+	 * Note: I did not change anything in this method. To be honest, I don't really get how it evaluates the mobility modes.
+	 * All I changed are the names of the variables, to be in line with other variable names.
+	 */
+	list<list> evalutateMobilityMode {
 		list<list> candidates;
 		loop mode over: possibleMobilityModes {
 			list<float> characteristic <- charactPerMobility[mode];
@@ -276,7 +283,6 @@ species Human skills: [moving] {
 			publicTransportStatus <- WALKING_PICK_UP;
 			do goto target: closestBusStop.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
 			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
-
 			if (location = closestBusStop.location) {
 				add self to: closestBusStop.waitingPeople;
 				publicTransportStatus <- WAITING_PICK_UP;
@@ -289,12 +295,7 @@ species Human skills: [moving] {
 			//	target location reached, resetting params
 			if (location = currentObjective.target.location) {
 				do stopTimer;
-				currentPlace <- currentObjective.target;
-				closestBusStop <- BusStop with_min_of (each distance_to (self));
-				location <- any_location_in(currentPlace);
-				currentObjective <- nil;
-				mobilityMode <- nil;
-				publicTransportStatus <- nil;
+				do handleTargetReached;
 			}
 
 		}
@@ -316,25 +317,33 @@ species Human skills: [moving] {
 			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
 			if (location = currentObjective.target.location) {
 				do stopTimer;
-				currentPlace <- currentObjective.target;
-				closestBuilding <- Building with_min_of (each distance_to (self));
-				location <- any_location_in(currentPlace);
-				currentObjective <- nil;
-				mobilityMode <- nil;
-				publicTransportStatus <- nil;
+				do handleTargetReached;
 			}
 
 		}
 
 	}
 
+	/**
+	 * Handles the case when the human has reached his target.
+	 * Reset dynamic values, to initial values.
+	 */
+	action handleTargetReached {
+		currentPlace <- currentObjective.target;
+		closestBuilding <- Building with_min_of (each distance_to (self));
+		location <- any_location_in(currentPlace);
+		currentObjective <- nil;
+		mobilityMode <- nil;
+		publicTransportStatus <- nil;
+	}
+
 	action startTimer {
-		time_stamp <- time;
+		timeStamp <- time;
 	}
 
 	action stopTimer {
-		peopleTripTimeTotal << time - time_stamp;
-		time_stamp <- time;
+		peopleTripTimeTotal << time - timeStamp;
+		timeStamp <- time;
 	}
 
 	aspect default {

@@ -92,26 +92,26 @@ species Human skills: [moving] {
 	}
 
 	Building selectRandomBuildingForActivty (string humanOD, string activity) {
-		list<Building> possible_bds;
+		list<Building> possibleBuildings;
 		if (length(activity) = 2) and (first(activity) = "R") {
 			if humanOD = "out2ks" {
-				possible_bds <- Building where ((each.usage = "SAT"));
+				possibleBuildings <- Building where ((each.usage = "SAT"));
 			} else {
-				possible_bds <- Building where ((each.usage = "R") and (each.scale = last(activity)));
+				possibleBuildings <- Building where ((each.usage = "R") and (each.scale = last(activity)));
 			}
 
 		} else if (length(activity) = 2) and (first(activity) = "O") {
 			if humanOD = "ks2out" {
-				possible_bds <- Building where ((each.usage = "SAT"));
+				possibleBuildings <- Building where ((each.usage = "SAT"));
 			} else {
-				possible_bds <- Building where ((each.usage = "O") and (each.scale = last(activity)));
+				possibleBuildings <- Building where ((each.usage = "O") and (each.scale = last(activity)));
 			}
 
 		} else {
-			possible_bds <- Building where (each.category = activity);
+			possibleBuildings <- Building where (each.category = activity);
 		}
 
-		Building activityBuilding <- one_of(possible_bds);
+		Building activityBuilding <- one_of(possibleBuildings);
 		if (activityBuilding = nil) {
 			error "problem with act_real: " + activity;
 		}

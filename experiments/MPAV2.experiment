@@ -12,7 +12,7 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 	output {
 	/** monitors can be used to output values, either in the UI or in a file **/
 	// monitor "m1" value: an_expression;
-		display map type: opengl draw_env: false background: #black refresh: every(1 #cycle) {
+		display map type: opengl axes: false background: #black refresh: every(1 #cycle) {
 			species Road aspect: default;
 			species Building aspect: depth refresh: true;
 			species Human aspect: default;

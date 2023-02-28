@@ -8,6 +8,7 @@ model MPAV2
 
 import "Constants.gaml"
 import "Files.gaml"
+import "Functions.gaml"
 import "Parameters.gaml"
 import "Shared.gaml"
 import "Actors/Road.gaml"
@@ -24,7 +25,7 @@ global {
 		write "Global init called";
 		do initSharedValues;
 		create Road from: roadsShapeFile {
-			mobilityAllowed <- ["walking", "bike", "car", "bus"];
+			mobilityAllowed <- [WALKING, BIKE, CAR, BUS];
 			capacity <- shape.perimeter / 10.0;
 			congestionMap[self] <- shape.perimeter;
 		}
@@ -100,13 +101,13 @@ global {
 	}
 
 	action generateGoods {
-		create Goods number: goodsData["foods"][current_date.hour] {
-			type <- "foods";
+		create Goods number: goodsData[FOODS][current_date.hour] {
+			type <- FOODS;
 			target <- one_of(Building where (each.category != "Hub"));
 			do initPosition;
 		}
-		create Goods number: goodsData["packages"][current_date.hour] {
-			type <- "packages";
+		create Goods number: goodsData[PACKAGES][current_date.hour] {
+			type <- PACKAGES;
 			target <- one_of(Building where (each.usage != "Restaurant"));
 			do initPosition;
 		}

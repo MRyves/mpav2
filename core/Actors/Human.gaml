@@ -54,10 +54,6 @@ species Human skills: [moving] {
 	int publicTransportStatus;
 	float timeStamp;
 
-	init {
-		write "Calling Human#Init";
-	}
-
 	list<string> evalPossibleMobilityModes {
 		list<string> modes <- [WALKING, BUS];
 		if (hasCar) {
@@ -259,7 +255,7 @@ species Human skills: [moving] {
 			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] speed: speedPerMobility[mobilityMode];
 		}
 
-		if (location = currentObjective.target.location) {
+		if (world.equalLocation(location, currentObjective.target.location)) {
 			do stopTimer;
 			if (mobilityMode = CAR and updatePollution = true) {
 				do updatePollutionMap;
@@ -291,9 +287,7 @@ species Human skills: [moving] {
 		} else if (publicTransportStatus = WALKING_TARGET) {
 			do goto target: currentObjective.target.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
 			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
-
-			//	target location reached, resetting params
-			if (location = currentObjective.target.location) {
+			if (world.equalLocation(location, currentObjective.target.location)) {
 				do stopTimer;
 				do handleTargetReached;
 			}
@@ -315,7 +309,7 @@ species Human skills: [moving] {
 		} else if (publicTransportStatus = WALKING_TARGET) {
 			do goto target: currentObjective.target.location on: graphPerMobility[WALKING] speed: speedPerMobility[WALKING];
 			transportTypeDistance[WALKING] <- transportTypeDistance[WALKING] + speed / step;
-			if (location = currentObjective.target.location) {
+			if (world.equalLocation(location, currentObjective.target.location)) {
 				do stopTimer;
 				do handleTargetReached;
 			}

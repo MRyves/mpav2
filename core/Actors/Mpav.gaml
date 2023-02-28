@@ -8,12 +8,14 @@ model Mpav
 
 import "Human.gaml"
 import "Goods.gaml"
+import "../Functions.gaml"
 
 global {
 	float mpavIdle <- 0.0;
 	float mpavWorking <- 0.0;
 	list<Human> mpavWaitingPeople <- [];
 	list<Goods> mpavWaitingGoods <- [];
+	
 }
 
 species Mpav skills: [moving] {
@@ -61,7 +63,7 @@ species Mpav skills: [moving] {
 
 			targets << p;
 		}
-
+		
 		return targets;
 	}
 
@@ -75,14 +77,12 @@ species Mpav skills: [moving] {
 			}
 
 		}
-
-		if (location = target.location) {
+		if (world.equalLocation(location, target.location, 10)) {
 			do startWaiting;
 			do handleGoods;
 			do handleHumans;
 			target <- nil;
 		}
-
 	}
 
 	/**
@@ -93,7 +93,7 @@ species Mpav skills: [moving] {
 	 */
 	action handleGoods {
 	// remove goods which reached their target
-		loop g over: goodsInMpav where ((each.target = target)) {
+		loop g over: goodsInMpav where ((each.target = self.target)) {
 			remove g from: goodsInMpav;
 			ask g {
 				do stopTimer;
@@ -103,7 +103,7 @@ species Mpav skills: [moving] {
 		}
 		// add the goods waiting at current location
 		// once the mpav is full, no more goods will be added
-		loop g over: mpavWaitingGoods where ((each.origin = target)) {
+		loop g over: mpavWaitingGoods where ((each.origin = self.target)) {
 			remove g from: mpavWaitingGoods;
 			add g to: goodsInMpav;
 			if length(goodsInMpav) >= maxGoodsCount {
@@ -121,7 +121,7 @@ species Mpav skills: [moving] {
 		loop p over: peopleInMpav where ((each.currentObjective.target = target)) {
 			remove p from: peopleInMpav;
 			ask p {
-				location <- myself.target.location;
+				location <- myself.location;
 				publicTransportStatus <- WALKING_TARGET;
 			}
 

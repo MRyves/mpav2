@@ -23,13 +23,13 @@ species Goods {
 
 	action initPosition {
 		switch type {
-			match "foods" {
+			match FOODS {
 				origin <- one_of(Building where (each.category = "Restaurant"));
 				location <- any_location_in(origin);
 				color <- #yellow;
 			}
 
-			match "packages" {
+			match PACKAGES {
 				origin <- one_of(Building where (each.usage = "Hub"));
 				location <- any_location_in(origin);
 				color <- #aqua;

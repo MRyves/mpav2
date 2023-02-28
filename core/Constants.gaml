@@ -17,6 +17,9 @@ global {
 	string CAR <- "car" const: true;
 	string TRUCK <- "truck" const: true;
 	
+	string FOODS <- "foods" const: true;
+	string PACKAGES <- "packages" const: true;
+	
 	// constant for transport status:
 	// 0 = human is walking to the pick-up location (e.g. bus stop, building)
 	// 1 = human arrived at pick-up location, waiting for pick up

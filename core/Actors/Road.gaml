@@ -11,9 +11,6 @@ import "../Shared.gaml"
 global {
 	map<Road, float> congestionMap;
 
-	init {
-		write "Road#Global init called";
-	}
 
 	/**
 	 * Function computes all the graphs for each mobility mode.
@@ -36,7 +33,6 @@ species Road {
 	float speedCoeff <- 1.0 update: shape.perimeter / max([0.01, exp(-currentConcentration / capacity)]);
 
 	init {
-		write "Road#Species init called";
 		congestionMap[self] <- shape.perimeter;
 	}
 

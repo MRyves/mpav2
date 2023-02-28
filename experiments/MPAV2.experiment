@@ -4,12 +4,21 @@
 * Author: Yves
 * Tags: 
 */
-experiment MPAV2 model: '../core/Global.gaml' type: gui {
-/** Insert here the definition of the inputs and outputs of the model */
 
-/** Parameters can be used to input values to the model **/
-	output {
-	/** monitors can be used to output values, either in the UI or in a file **/
+/**
+* Name: MPAV2
+* This wizard creates a new experiment file. 
+* Author: Yves
+* Tags: 
+*/
+
+
+experiment MPAV2 model: '../core/Global.gaml' type: gui {
+
+
+	output  {
+		layout #stack consoles: false;
+		
 		display map type: opengl axes: false background: #black refresh: every(1 #cycle) {
 			species Road aspect: default;
 			species Building aspect: depth refresh: true;
@@ -19,8 +28,84 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 			species Bus aspect: default;
 		}
 
+		display Statics refresh: false {
+			chart "People Distribution" background: #black type: pie size: {0.5, 0.5} color: #white axes: #yellow title_font:
+			font('Helvetica', 12) tick_font: font('Helvetica', 10, #bold) label_font: font('Helvetica', 32, #bold) x_label: 'Nice Xlabel' y_label: 'Nice Ylabel' {
+				loop i from: 0 to: length(proportionPerHumanType.keys) - 1 {
+					data proportionPerHumanType.keys[i] value: proportionPerHumanType.values[i] color: peopleColors[proportionPerHumanType.keys[i]];
+				}
+
+			}
+		}
+
+		display Dashboard1 type: java2D {
+			chart "Cumulative Trip" background: #black type: pie style: ring size: {0.5, 0.5} color: #white axes: #yellow
+			title_font: font('Helvetica', 12) tick_font: font('Monospaced', 12, #bold) label_font: font('Arial', 32, #bold) x_label: 'Nice Xlabel' y_label: 'Nice Ylabel' {
+				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
+					if (transportTypeCumulativeUsage.keys[i] != TRUCK) {
+						data transportTypeCumulativeUsage.keys[i] value: transportTypeCumulativeUsage.values[i] color: colorPerMobility[transportTypeCumulativeUsage.keys[i]];
+					}
+
+				}
+
+			}
+
+			
+			chart "Trip Total Usage by Time" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {world.shape.width / 2, 0} color: #white title_font:
+			font('Helvetica', 12) {
+				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
+					data transportTypeCumulativeUsage.keys[i] value: transportTypeCumulativeUsage.values[i] color: colorPerMobility[transportTypeCumulativeUsage.keys[i]] marker: false
+					thickness: 2.0;
+				}
+
+			}
+
+			// position: {world.shape.width / 2, world.shape.height / 2}
+			chart "Trip Usage by Days" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {0, world.shape.height / 2} color: #white title_font:
+			font('Helvetica', 12) {
+				loop i from: 0 to: length(transportTypeDailyUsage.keys) - 1 {
+					data transportTypeDailyUsage.keys[i] value: transportTypeDailyUsage.values[i] color: colorPerMobility[transportTypeDailyUsage.keys[i]] marker: false thickness: 2.0;
+				}
+
+			}
+
+			chart "Trip Usage Increment" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5}  position: {world.shape.width / 2, world.shape.height / 2} color: #white title_font:
+			font('Helvetica', 12) {
+				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
+					if i = 0 {
+						data transportTypeCumulativeUsage.keys[i] value: transportTypeCumulativeUsage.values[i] color: colorPerMobility[transportTypeCumulativeUsage.keys[i]] marker: false
+						thickness: 2.0;
+					} else {
+						data transportTypeCumulativeUsage.keys[i] value: transportTypeCumulativeUsage.values[i] - transportTypeCumulativeUsage.values[i - 1] color:
+						colorPerMobility[transportTypeCumulativeUsage.keys[i]] marker: false thickness: 2.0;
+					}
+
+				}
+
+			}
+
+		}
+		
+		display Dashboard2 type: java2D {
+			chart "CO2 Cumulative Emission" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} color: #white title_font:
+			font('Helvetica', 12) {
+				loop i from: 0 to: length(transportTypeCumulativeEmission.keys) - 1 {
+					data transportTypeCumulativeEmission.keys[i] value: transportTypeCumulativeEmission.values[i] color: colorPerMobility[transportTypeCumulativeEmission.keys[i]] marker: false
+					thickness: 2.0;
+				}
+
+			}
+		}
+
 		monitor "Time" value: string(current_date.hour) + "h" + string(current_date.minute) + "m";
-		monitor "transportTypeCumulativeUsage" value: transportTypeCumulativeUsage;
+		monitor "Total Emission (Co2 eq kg):" value: sum(transportTypeCumulativeEmission.values);
+		monitor "MPAV Usage:" value: string(int(10000 * mpavWorking / (mpavIdle + mpavWorking)) / 100) + '%';
+		monitor "Green Modes Usage:" value: string(int(10000 * (1 - transportTypeCumulativeUsage[CAR] / sum(transportTypeCumulativeUsage.values))) / 100) + '%';
+		monitor "Travel Time per Trip:" value: string(int(sum(peopleTripTimeTotal) / length(peopleTripTimeTotal) / 60)) + 'min';
+		monitor "Delivery Time per Trip:" value: string(int(sum(goodsTripTimeTotal) / length(goodsTripTimeTotal) / 60)) + 'min';
+		monitor "Travel Cost per Trip:" value: string(int(100 * sum(transportTypeTotalCost.values) / sum(transportTypeTotalCost.values)) / 100) + '$';
+		monitor "Total Waiting time:" value: string(sum(transportTypeTotalWaiting.values)) + 'min';
 	}
 
 }
+

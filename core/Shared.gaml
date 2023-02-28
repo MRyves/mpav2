@@ -35,7 +35,7 @@ global {
 	}
 
 	action initSharedValues {
-		write "Shared init called";
+		write "Shared init called. Reading data files...";
 		do characteristicFileImport;
 		do activityDataImport;
 		do criteriaFileImport;

@@ -13,7 +13,7 @@ species Bus skills: [moving] {
 	list<BusStop> stops;
 	// the next bus stop
 	BusStop target;
-	// key: bus stop, value: humans which have to go to the bus stop (key)
+	// key: bus stop, value: humans which have to go to the bus stop (the key)
 	// one can consider that the values are all the humans currently on the bus
 	map<BusStop, list<Human>> peopleToStops;
 
@@ -33,7 +33,7 @@ species Bus skills: [moving] {
 			transportTypeDistance["bus_people"] <- transportTypeDistance["bus_people"] + speed / step * passengersCount;
 		}
 
-		if (location = target.location) {
+		if (world.equalLocation(location, target.location)) {
 		// the bus has reached the current target (bus station)
 			do releasePeople;
 			do pickupPeople;

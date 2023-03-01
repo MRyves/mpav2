@@ -11,14 +11,18 @@
 * Author: Yves
 * Tags: 
 */
-
-
 experiment MPAV2 model: '../core/Global.gaml' type: gui {
+	point defaultSize <- {0.5, 0.5};
+	font titleFont <- font('Helvetica', 12);
+	font tickFont <- font('Helvetica', 10, #bold);
+	list<point> positions;
 
+	init {
+		positions <- [{0, 0}, {world.shape.width / 2, 0}, {0, world.shape.height / 2}, {world.shape.width / 2, world.shape.height / 2}];
+	}
 
-	output  {
+	output {
 		layout #stack consoles: false;
-		
 		display map type: opengl axes: false background: #black refresh: every(1 #cycle) {
 			species Road aspect: default;
 			species Building aspect: depth refresh: true;
@@ -26,21 +30,29 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 			species BusStop aspect: default;
 			species Mpav aspect: default;
 			species Bus aspect: default;
+			species PollutionHeatMap aspect: pollution transparency: 0.25;
 		}
 
 		display Statics refresh: false {
-			chart "People Distribution" background: #black type: pie size: {0.5, 0.5} color: #white axes: #yellow title_font:
-			font('Helvetica', 12) tick_font: font('Helvetica', 10, #bold) label_font: font('Helvetica', 32, #bold) x_label: 'Nice Xlabel' y_label: 'Nice Ylabel' {
+			chart "People Distribution" background: #black type: pie size: defaultSize position: positions[0] color: #white axes: #yellow title_font: titleFont tick_font: tickFont
+			label_font: font('Helvetica', 32, #bold) {
 				loop i from: 0 to: length(proportionPerHumanType.keys) - 1 {
 					data proportionPerHumanType.keys[i] value: proportionPerHumanType.values[i] color: peopleColors[proportionPerHumanType.keys[i]];
 				}
 
 			}
+
+			chart "Mobility distribution" background: #black type: pie size: defaultSize position: positions[1] color: #white axes: #yellow title_font: titleFont tick_font: tickFont {
+				data CAR value: Human count (each.hasCar and !each.hasBike);
+				data BIKE value: Human count (each.hasBike and !each.hasCar);
+				data "Bike&Car" value: Human count (each.hasCar and each.hasBike);
+			}
+
 		}
 
 		display Dashboard1 type: java2D {
-			chart "Cumulative Trip" background: #black type: pie style: ring size: {0.5, 0.5} color: #white axes: #yellow
-			title_font: font('Helvetica', 12) tick_font: font('Monospaced', 12, #bold) label_font: font('Arial', 32, #bold) x_label: 'Nice Xlabel' y_label: 'Nice Ylabel' {
+			chart "Cumulative Trip" background: #black type: pie style: ring size: {0.5, 0.5} color: #white axes: #yellow title_font: font('Helvetica', 12) tick_font:
+			font('Monospaced', 12, #bold) label_font: font('Arial', 32, #bold) x_label: 'Nice Xlabel' y_label: 'Nice Ylabel' {
 				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
 					if (transportTypeCumulativeUsage.keys[i] != TRUCK) {
 						data transportTypeCumulativeUsage.keys[i] value: transportTypeCumulativeUsage.values[i] color: colorPerMobility[transportTypeCumulativeUsage.keys[i]];
@@ -50,7 +62,6 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 
 			}
 
-			
 			chart "Trip Total Usage by Time" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {world.shape.width / 2, 0} color: #white title_font:
 			font('Helvetica', 12) {
 				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
@@ -60,16 +71,14 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 
 			}
 
-			// position: {world.shape.width / 2, world.shape.height / 2}
-			chart "Trip Usage by Days" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {0, world.shape.height / 2} color: #white title_font:
-			font('Helvetica', 12) {
+			chart "Trip Usage by Days" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {0, world.shape.height / 2} color: #white title_font: font('Helvetica', 12) {
 				loop i from: 0 to: length(transportTypeDailyUsage.keys) - 1 {
 					data transportTypeDailyUsage.keys[i] value: transportTypeDailyUsage.values[i] color: colorPerMobility[transportTypeDailyUsage.keys[i]] marker: false thickness: 2.0;
 				}
 
 			}
 
-			chart "Trip Usage Increment" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5}  position: {world.shape.width / 2, world.shape.height / 2} color: #white title_font:
+			chart "Trip Usage Increment" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {world.shape.width / 2, world.shape.height / 2} color: #white title_font:
 			font('Helvetica', 12) {
 				loop i from: 0 to: length(transportTypeCumulativeUsage.keys) - 1 {
 					if i = 0 {
@@ -85,9 +94,14 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 			}
 
 		}
-		
+
 		display Dashboard2 type: java2D {
-			chart "CO2 Cumulative Emission" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} color: #white title_font:
+			chart "Goods trip time" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} color: #white title_font: font('Helvetica', 12) {
+				data "avg" value: goodsTripTimeTotal mean_of (each) color: #white thickness: 2.0;
+				data "median" value: median(goodsTripTimeTotal) color: #yellow thickness: 2.0;
+			}
+
+			chart "CO2 Cumulative Emission" background: #black axes: rgb(125, 125, 125) size: {0.5, 0.5} position: {world.shape.width / 2, 0} color: #white title_font:
 			font('Helvetica', 12) {
 				loop i from: 0 to: length(transportTypeCumulativeEmission.keys) - 1 {
 					data transportTypeCumulativeEmission.keys[i] value: transportTypeCumulativeEmission.values[i] color: colorPerMobility[transportTypeCumulativeEmission.keys[i]] marker: false
@@ -95,9 +109,11 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 				}
 
 			}
+
 		}
 
 		monitor "Time" value: string(current_date.hour) + "h" + string(current_date.minute) + "m";
+		monitor "Weather" value: weatherDescription + " (" + currentWeather + ")" refresh: every(1 #day);
 		monitor "Total Emission (Co2 eq kg):" value: sum(transportTypeCumulativeEmission.values);
 		monitor "MPAV Usage:" value: string(int(10000 * mpavWorking / (mpavIdle + mpavWorking)) / 100) + '%';
 		monitor "Green Modes Usage:" value: string(int(10000 * (1 - transportTypeCumulativeUsage[CAR] / sum(transportTypeCumulativeUsage.values))) / 100) + '%';

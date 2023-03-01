@@ -1,12 +1,17 @@
 /**
 * Name: Files
-* Based on the internal empty template. 
 * Author: Yves
-* Tags: 
 */
 
 
 model Files
+
+/**
+ * This model manages all the input files of the simulation.
+ * Every file which is used for the experiment should be created here.
+ * There is a simple test (name: FilesExistTest) which can be executed to check if all the required files exist.
+ * It is an empty test, as GAMA will throw an exception if it can not find a file.
+ */
 
 global {
 	
@@ -49,9 +54,6 @@ global {
 		assert true;
 	}
 	
-	init {
-		write "Files init called";
-	}
 }
 
 experiment FilesExistTest type: test autorun: true {}

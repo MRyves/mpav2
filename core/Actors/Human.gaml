@@ -14,10 +14,11 @@ import "BusStop.gaml"
 import "TripObjective.gaml"
 import "Road.gaml"
 import "Mpav.gaml"
+import "PollutionHeatMap.gaml"
 
 global {
 
-// INDICATOR
+// INDICATORs
 	map<string, int> transportTypeCumulativeUsage <- map(mobilityList collect (each::0));
 	map<string, int> transportTypeDailyUsage <- map(mobilityList collect (each::0));
 	map<string, int> transportTypeCumulativeEmission <- map(mobilityList collect (each::0));
@@ -53,7 +54,6 @@ species Human skills: [moving] {
 	Building closestBuilding;
 	int publicTransportStatus;
 	float timeStamp;
-
 	list<string> evalPossibleMobilityModes {
 		list<string> modes <- [WALKING, BUS];
 		if (hasCar) {
@@ -130,16 +130,17 @@ species Human skills: [moving] {
 	}
 
 	action updatePollutionMap {
-	// TODO: create gridHeatMap
-	//		ask gridHeatmaps overlapping(current_path.shape) {
-	//			pollution_level <- pollution_level + 1;
-	//		}
+		ask PollutionHeatMap overlapping (current_path.shape) {
+			pollutionLevel <- pollutionLevel + 1;
+		}
+
 	}
 
 	reflex updateDensityMap when: (every(#hour) and updateDensity = true) {
-	//		ask gridHeatmaps{
-	//		  density<-length(people overlapping self);	
-	//		}
+		ask PollutionHeatMap {
+			density <- length(Human overlapping self);
+		}
+
 	}
 
 	reflex chooseObjective when: currentObjective = nil {

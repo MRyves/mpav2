@@ -7,14 +7,25 @@
 model Bus
 
 import "Human.gaml"
+
+/**
+ * Agents represents a bus, which is moving around the bus stations all the time.
+ * At the moment there is no concept of a time-scheduler implemented.
+ * The bus starts driving at the beginning of the simulation and never stops.
+ */
+
 species Bus skills: [moving] {
 	geometry shape <- rectangle(40, 30);
-	// list of all the bus stops on the map
+	/** 
+	 * list of all the bus stops on the map
+	 */
 	list<BusStop> stops;
-	// the next bus stop
+	/** the next bus stop */
 	BusStop target;
-	// key: bus stop, value: humans which have to go to the bus stop (the key)
-	// one can consider that the values are all the humans currently on the bus
+	/**
+	 * Usage: All the people in the bus, which have to descend on different bus stops.
+	 * key: bus stop, value: humans which have to go out at that bus stop (the key)
+	 */
 	map<BusStop, list<Human>> peopleToStops;
 
 	reflex newTarget when: target = nil {
@@ -25,6 +36,10 @@ species Bus skills: [moving] {
 		target <- firstStop;
 	}
 
+	/**
+	 * Drive to the next target.
+	 * If targed reached, let the people descend and pick up the waiting humans at the current bus stop. 
+	 */
 	reflex move when: target != nil {
 		do goto target: target.location on: graphPerMobility[CAR] speed: speedPerMobility[BUS];
 		int passengersCount <- peopleToStops.values sum_of (length(each));

@@ -1,8 +1,6 @@
 /**
 * Name: Global
-* Based on the internal empty template. 
 * Author: Yves
-* Tags: 
 */
 model MPAV2
 
@@ -18,11 +16,15 @@ import "Actors/Bus.gaml"
 
 global {
 	geometry shape <- envelope(roadsShapeFile);
-	float step <- stepsPerMin #mn;
-	date starting_date <- date([2022, 5, 4, 7, 30]);
+	float step <- minsPerStep #mn;
+	// date starting_date <- date([2022, 5, 4, 7, 30]);
+	date starting_date <- date([2022, 1, 1, 7, 30]);
+	
+	float currentWeather <- 0.5;
+	string weatherDescription <- "Loading...";	
+	
 
 	init {
-		write "Global init called";
 		do initSharedValues;
 		create Road from: roadsShapeFile {
 			mobilityAllowed <- [WALKING, BIKE, CAR, BUS];
@@ -115,6 +117,12 @@ global {
 	
 	reflex cyclic_generate_goods when: every(1#hour){
 		do generateGoods;
+	}
+	
+	reflex updateWeather when: every(1#day) {
+		point meanAndStd <- weatherCoffPerMonth[current_date.month];
+		currentWeather <- gauss(meanAndStd);
+		weatherDescription <- getWeatherCondition(currentWeather);
 	}
 	
 

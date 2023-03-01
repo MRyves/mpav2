@@ -13,6 +13,13 @@ global {
 	list<float> goodsTripTimeTotal <- [];
 }
 
+/**
+ * Goods can either be of type 'food' or of type 'packages'.
+ * Each good starts at the origin building and has to be transportet to the target building.
+ * In the simulation the only mean of transportation for goods are the mpavs.
+ * Once the good reaches the target building it will be removed from the experiment.
+ */
+
 species Goods {
 	string type;
 	rgb color;

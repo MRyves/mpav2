@@ -18,15 +18,14 @@ global {
 	geometry shape <- envelope(roadsShapeFile);
 	float step <- minsPerStep #mn;
 	// date starting_date <- date([2022, 5, 4, 7, 30]);
-	date starting_date <- date([2022, 1, 1, 7, 30]);
+	date starting_date <- date([2022, 1, 1, 7, 59]);
 	
-	float currentWeather <- 0.5;
 	string weatherDescription <- "Loading...";	
 	
 
 	init {
 		do initSharedValues;
-		create Road from: roadsShapeFile {
+		create Road from: roadsShapeFile with: [maxSpeed::float(read("maxSpeed"))] {
 			mobilityAllowed <- [WALKING, BIKE, CAR, BUS];
 			capacity <- shape.perimeter / 10.0;
 			congestionMap[self] <- shape.perimeter;
@@ -102,7 +101,8 @@ global {
 
 	}
 
-	action generateGoods {
+
+	 action generateGoods {
 		create Goods number: goodsData[FOODS][current_date.hour] {
 			type <- FOODS;
 			target <- one_of(Building where (each.category != "Hub"));

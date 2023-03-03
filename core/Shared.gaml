@@ -13,6 +13,11 @@ import "Files.gaml"
  * Otherwhise there would be a high risk of circular-dependency
  */
 global {
+/**
+	 * The current weather in the simulation
+	 */
+	float currentWeather <- 0.5;
+
 	/**
 	 * Usage: used during mobility mode evaulation
 	 */

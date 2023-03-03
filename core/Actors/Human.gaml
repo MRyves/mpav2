@@ -71,6 +71,7 @@ species Human skills: [moving] {
 		return modes;
 	}
 
+
 	action createTripObjectives {
 		if empty(activityData) or type = nil {
 			error "ActivitData is empty";
@@ -245,15 +246,21 @@ species Human skills: [moving] {
 	}
 
 	reflex move when: (currentObjective != nil) and (mobilityMode != BUS) and (mobilityMode != MPAV) {
-		transportTypeDistance[mobilityMode] <- transportTypeDistance[mobilityMode] + speed / step;
-		if ((current_edge != nil) and (mobilityMode = CAR)) {
-			Road(current_edge).currentConcentration <- max([0, Road(current_edge).currentConcentration - 1]);
+		speed <- speedPerMobility[mobilityMode];
+		if (current_edge != nil) {
+			Road currentRoad <- Road(current_edge);
+			speed <- min(currentRoad.maxSpeed, speed);
+			if (mobilityMode = CAR) {
+				Road(current_edge).currentConcentration <- max([0, Road(current_edge).currentConcentration - 1]);
+			}
+
 		}
 
+		transportTypeDistance[mobilityMode] <- transportTypeDistance[mobilityMode] + speed / step;
 		if (mobilityMode = CAR) {
-			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] move_weights: congestionMap speed: speedPerMobility[CAR];
+			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] move_weights: congestionMap speed: speed;
 		} else {
-			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] speed: speedPerMobility[mobilityMode];
+			do goto target: currentObjective.target.location on: graphPerMobility[mobilityMode] speed: speed;
 		}
 
 		if (world.equalLocation(location, currentObjective.target.location)) {
@@ -376,13 +383,6 @@ species Human skills: [moving] {
 
 	aspect base {
 		draw circle(size) at: location + {0, 0, (currentPlace != nil ? currentPlace.height : 0.0) + 4} color: #grey;
-	}
-
-	aspect layer {
-		if (desiredCycle mod refreshRate = 0) {
-			draw sphere(size) at: {location.x, location.y, cycle * 2} color: #white;
-		}
-
 	}
 
 }

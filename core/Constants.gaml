@@ -25,7 +25,7 @@ global {
 	string FOODS <- "foods" const: true;
 	string PACKAGES <- "packages" const: true;
 	
-	// constant for transport status:
+	// constant for public transport status:
 	// 0 = human is walking to the pick-up location (e.g. bus stop, building)
 	// 1 = human arrived at pick-up location, waiting for pick up
 	// 2 = transport (mpav / bus) arrived at stop closest to target, human walks from there

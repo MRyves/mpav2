@@ -35,7 +35,7 @@ global {
 	file amenitiesShapeFile <- file(volpePath + "amenities.shp");
 	file boundsShapeFile <- file(volpePath + "Bounds.shp");
 	file<geometry> buildingsShapeFile <- file<geometry>(volpePath + "Buildings.shp");
-	file<geometry> roadsShapeFile <- file<geometry>(volpePath + "Roads.shp");
+	file roadsShapeFile <- file(volpePath + "Roads.shp");
 	file tableBoundsShapeFile <- file(volpePath + "table_bounds.shp");
 	
 	// energy folder

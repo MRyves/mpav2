@@ -5,12 +5,6 @@
 * Tags: 
 */
 
-/**
-* Name: MPAV2
-* This wizard creates a new experiment file. 
-* Author: Yves
-* Tags: 
-*/
 experiment MPAV2 model: '../core/Global.gaml' type: gui {
 	point defaultSize <- {0.5, 0.5};
 	font titleFont <- font('Helvetica', 12);
@@ -23,9 +17,10 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 
 	output {
 		layout #stack consoles: false;
+		// 2d??
 		display map type: opengl axes: false background: #black refresh: every(1 #cycle) {
 			species Road aspect: default;
-			species Building aspect: depth refresh: true;
+			species Building aspect: depth;
 			species Human aspect: default;
 			species BusStop aspect: default;
 			species Mpav aspect: default;
@@ -46,6 +41,7 @@ experiment MPAV2 model: '../core/Global.gaml' type: gui {
 				data CAR value: Human count (each.hasCar and !each.hasBike);
 				data BIKE value: Human count (each.hasBike and !each.hasCar);
 				data "Bike&Car" value: Human count (each.hasCar and each.hasBike);
+				data "None" value: Human count (!each.hasCar and !each.hasBike);
 			}
 
 		}
